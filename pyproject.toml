@@ -1,0 +1,15 @@
+[project]
+name = "pantheonrl"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10.18"
+dependencies = [
+    "flask==2.2.2",
+    "tensorflow",
+    "torch==1.13.1",
+    "tensorboard",
+    "stable-baselines3",
+    "scipy",
+    "tqdm"
+]
