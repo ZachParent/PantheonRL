@@ -7,10 +7,9 @@ master/src/imitation/algorithms/bc.py
 """
 
 import contextlib
-from typing import (Any, Callable, Dict, Iterable, Mapping,
-                    Optional, Tuple, Type, Union)
+from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Tuple, Type, Union
 
-import gym
+import gymnasium as gym
 import numpy as np
 import torch as th
 import torch.utils.data as th_data
@@ -19,8 +18,7 @@ from torch.optim.adam import Adam
 import tqdm.autonotebook as tqdm
 from stable_baselines3.common import policies, utils
 
-from pantheonrl.common.trajsaver import (TransitionsMinimal,
-                                              transitions_collate_fn)
+from pantheonrl.common.trajsaver import TransitionsMinimal, transitions_collate_fn
 from pantheonrl.common.util import FeedForward32Policy
 
 log = utils.configure_logger(verbose=0)  # change to 1 for debugging
@@ -170,7 +168,6 @@ class EpochOrBatchIteratorWithProgress:
 
 
 class BC:
-
     DEFAULT_BATCH_SIZE: int = 32
     """
     Default batch size for DataLoader automatically constructed from
@@ -212,8 +209,7 @@ class BC:
         """
         if optimizer_kwargs:
             if "weight_decay" in optimizer_kwargs:
-                raise ValueError(
-                    "Use the parameter l2_weight instead of weight_decay.")
+                raise ValueError("Use the parameter l2_weight instead of weight_decay.")
 
         self.action_space = action_space
         self.observation_space = observation_space
@@ -232,8 +228,7 @@ class BC:
         )  # pytype: disable=not-instantiable
         optimizer_kwargs = optimizer_kwargs or {}
 
-        self.optimizer = optimizer_cls(
-            self.policy.parameters(), **optimizer_kwargs)
+        self.optimizer = optimizer_cls(self.policy.parameters(), **optimizer_kwargs)
 
         self.expert_data_loader: Optional[Iterable[Mapping]] = None
         self.ent_weight = ent_weight
@@ -348,8 +343,7 @@ class BC:
 
         batch_num = 0
         for batch, stats_dict_it in it:
-            loss, stats_dict_loss = self._calculate_loss(
-                batch["obs"], batch["acts"])
+            loss, stats_dict_loss = self._calculate_loss(batch["obs"], batch["acts"])
 
             self.optimizer.zero_grad()
             loss.backward()

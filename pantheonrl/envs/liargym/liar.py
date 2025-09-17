@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 import numpy as np
 
 from pantheonrl.common.agents import Agent
@@ -27,14 +27,13 @@ def randRoll():
 
 
 class LiarDefaultAgent(Agent):
-
     def get_action(self, obs, record=True):
         obs = obs.obs
         obs = obs.tolist()
         hand = obs[:N]
         maxval = max(hand)
         count = hand.index(maxval)
-        if obs[N] != N and obs[N+1] > maxval:
+        if obs[N] != N and obs[N + 1] > maxval:
             return np.array(BLUFF)
         return np.array([count, maxval])
 
@@ -43,7 +42,6 @@ class LiarDefaultAgent(Agent):
 
 
 class LiarEnv(TurnBasedEnv):
-
     def __init__(self, probegostart=0.5):
         super(LiarEnv, self).__init__(probegostart=probegostart)
         self.history = []
@@ -51,14 +49,11 @@ class LiarEnv(TurnBasedEnv):
         self.action_space = ACTION_SPACE
 
     def getObs(self, isego):
-        prevmove = self.history + DEFAULT * \
-            (MAX_MOVES - len(self.history) // 2)
+        prevmove = self.history + DEFAULT * (MAX_MOVES - len(self.history) // 2)
         return np.array((self.egohand if isego else self.althand) + prevmove)
 
     def sanitize_action(self, action):
-
-        if len(self.history) != 0 and (action[1] <= self.history[1]
-                                       or action[0] == N):
+        if len(self.history) != 0 and (action[1] <= self.history[1] or action[0] == N):
             return BLUFF
 
         if len(self.history) == 0 and action[0] == N:
@@ -77,7 +72,7 @@ class LiarEnv(TurnBasedEnv):
     def player_step(self, action, isego):
         action = self.sanitize_action(action)
         if action == BLUFF:
-            didwin = (self.eval_bluff() == isego)
+            didwin = self.eval_bluff() == isego
             return self.getObs(not isego), WIN if didwin else LOSE, True, {}
         self.history = action + self.history
         return self.getObs(not isego), (0, 0), False, {}

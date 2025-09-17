@@ -1,16 +1,23 @@
 # the more complex version of blockworld, where the constructor doesn't see the blocks beforehand
-import gym
+import gymnasium as gym
 import numpy as np
 
 from pantheonrl.common.agents import Agent
 from pantheonrl.common.multiagentenv import TurnBasedEnv, DummyEnv
-from pantheonrl.envs.blockworldgym.gridutils import HORIZONTAL, VERTICAL, generate_random_world, gravity, place, matches
+from pantheonrl.envs.blockworldgym.gridutils import (
+    HORIZONTAL,
+    VERTICAL,
+    generate_random_world,
+    gravity,
+    place,
+    matches,
+)
 
 GRIDLEN = 7  # block world in a 7 x 7 grid
 NUM_BLOCKS = 5  # the number of blocks will be variable in the non-simplified version,
 # but allows for a constant sized action space here
 
-#TODO: make sure color and action space/resulting grid are consistent
+# TODO: make sure color and action space/resulting grid are consistent
 NUM_COLORS = 2
 BLUE = 1
 RED = 2  # useful for if we add graphics later
@@ -22,9 +29,9 @@ PLANNER_ACTION_SPACE = gym.spaces.Discrete(NUM_TOKENS)  # tokens that represent 
 CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete([GRIDLEN, 2, NUM_COLORS])
 # plus an extra option to do nothing
 
-gridformat = [NUM_COLORS+1]*GRIDLEN*GRIDLEN
+gridformat = [NUM_COLORS + 1] * GRIDLEN * GRIDLEN
 # can see what the planner said and the "real world" grid
-CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete([NUM_TOKENS]+gridformat)
+CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete([NUM_TOKENS] + gridformat)
 # can see the planned grid and the "real world" grid
 PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete(gridformat + gridformat)
 
@@ -60,15 +67,15 @@ class BlockEnv(TurnBasedEnv):
 
     def ego_step(self, action):
         self.last_token = action
-        done = action == NUM_TOKENS-1
+        done = action == NUM_TOKENS - 1
         reward = 0
         if done:
             reward = self.get_reward()
         return self.get_obs(False), [reward, reward], done, {}
 
     def alt_step(self, action):
-        x, orientation, color = action[0], action[1], action[2]+1
-        if not(orientation == HORIZONTAL and x == GRIDLEN-1):
+        x, orientation, color = action[0], action[1], action[2] + 1
+        if not (orientation == HORIZONTAL and x == GRIDLEN - 1):
             y = gravity(self.constructor_obs, orientation, x)
             if y != -1:
                 place(self.constructor_obs, x, y, color, orientation)
@@ -83,19 +90,24 @@ class BlockEnv(TurnBasedEnv):
         return 2 * truepos / (selected + relevant)
 
     def render(self, mode="human"):
-        from gym.envs.classic_control import rendering
+        from gymnasium.envs.classic_control import rendering
 
         screen_width = 700
-        scale = screen_width/GRIDLEN
+        scale = screen_width / GRIDLEN
         if self.viewer is None:
             self.viewer = rendering.Viewer(screen_width, screen_width)
             for i in range(len(self.gridworld)):
                 for j in range(len(self.gridworld[i])):
-                    left, right, top, bottom = j * \
-                        scale, (j+1)*scale, (GRIDLEN - i) * \
-                        scale, (GRIDLEN - (i+1))*scale
+                    left, right, top, bottom = (
+                        j * scale,
+                        (j + 1) * scale,
+                        (GRIDLEN - i) * scale,
+                        (GRIDLEN - (i + 1)) * scale,
+                    )
                     newblock = rendering.PolyLine(
-                        [(left, bottom), (left, top), (right, top), (right, bottom)], close=True)
+                        [(left, bottom), (left, top), (right, top), (right, bottom)],
+                        close=True,
+                    )
                     newblock.set_linewidth(10)
                     self.viewer.add_geom(newblock)
                     if self.gridworld[i][j] == RED:
@@ -105,11 +117,15 @@ class BlockEnv(TurnBasedEnv):
         for i in range(len(self.constructor_obs)):
             for j in range(len(self.constructor_obs[i])):
                 if not self.constructor_obs[i][j] == 0:
-                    left, right, top, bottom = j * \
-                        scale, (j+1)*scale, (GRIDLEN - i) * \
-                        scale, (GRIDLEN - (i+1))*scale
+                    left, right, top, bottom = (
+                        j * scale,
+                        (j + 1) * scale,
+                        (GRIDLEN - i) * scale,
+                        (GRIDLEN - (i + 1)) * scale,
+                    )
                     newblock = rendering.FilledPolygon(
-                        [(left, bottom), (left, top), (right, top), (right, bottom)])
+                        [(left, bottom), (left, top), (right, top), (right, bottom)]
+                    )
                     newblock.set_color(0.5, 0.5, 0.5)
                     self.viewer.add_geom(newblock)
                     if self.constructor_obs[i][j] == RED:

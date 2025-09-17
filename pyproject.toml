@@ -9,6 +9,7 @@ dependencies = [
     "tensorflow",
     "torch==1.13.1",
     "tensorboard",
+    "shimmy>=0.2.1",
     "stable-baselines3",
     "scipy",
     "tqdm"
